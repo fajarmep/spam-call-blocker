@@ -95,7 +95,7 @@
         app:tabGravity="fill"
         app:tabSelectedTextColor="@color/primary"
         app:tabTextColor="@color/text_secondary"
-        app:tabIconTint="@null"
+        app:tabIconTint="@color/tab_color_selector"
         app:tabInlineLabel="true"
         app:tabTextAppearance="@android:style/TextAppearance.Small">
 
