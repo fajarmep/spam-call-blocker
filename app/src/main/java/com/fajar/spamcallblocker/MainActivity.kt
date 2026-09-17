@@ -288,6 +288,17 @@ class MainActivity : AppCompatActivity() {
         binding.rvRules.layoutManager = LinearLayoutManager(this)
         binding.rvRules.adapter = rulesAdapter
 
+        binding.rgRuleType.setOnCheckedChangeListener { _, checkedId ->
+            val desc = when (checkedId) {
+                R.id.rbStartsWith -> "Blocks numbers beginning with the pattern below. Useful for blocking specific area codes or country codes (e.g. 021, +1)."
+                R.id.rbContains -> "Blocks any number containing this sequence anywhere in the digits (e.g. 8888)."
+                R.id.rbEndsWith -> "Blocks numbers that end with these exact digits."
+                R.id.rbExact -> "Blocks only this specific phone number exactly as typed."
+                else -> ""
+            }
+            binding.tvRuleDescription.text = desc
+        }
+
         binding.btnAddRule.setOnClickListener {
             val pattern = binding.etRulePattern.text.toString().trim()
             val note = binding.etRuleNote.text.toString().trim()

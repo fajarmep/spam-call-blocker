@@ -426,7 +426,7 @@
                             android:id="@+id/rgRuleType"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="8dp">
+                            android:layout_marginBottom="4dp">
 
                             <RadioButton
                                 android:id="@+id/rbStartsWith"
@@ -461,6 +461,20 @@
                                 android:textSize="13sp"
                                 android:textColor="@color/text_primary" />
                         </RadioGroup>
+
+                        <TextView
+                            android:id="@+id/tvRuleDescription"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Blocks numbers beginning with the pattern below. Useful for blocking specific area codes or country codes (e.g. 021, +1)."
+                            android:textSize="12sp"
+                            android:textColor="@color/text_secondary"
+                            android:layout_marginBottom="12dp"
+                            android:background="#1A58A6FF"
+                            android:paddingStart="8dp"
+                            android:paddingTop="6dp"
+                            android:paddingEnd="8dp"
+                            android:paddingBottom="6dp" />
 
                         <EditText
                             android:id="@+id/etRulePattern"
