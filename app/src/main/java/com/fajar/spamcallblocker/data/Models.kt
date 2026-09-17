@@ -1,10 +1,10 @@
 package com.fajar.spamcallblocker.data
 
 enum class RuleType(val displayName: String) {
-    STARTS_WITH("Starts With"),
+    STARTS_WITH("Starts with"),
     CONTAINS("Contains"),
-    ENDS_WITH("Ends With"),
-    EXACT("Exact Match")
+    ENDS_WITH("Ends with"),
+    EXACT("Exact match")
 }
 
 data class BlockedCall(

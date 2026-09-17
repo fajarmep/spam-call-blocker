@@ -283,8 +283,8 @@ class DatabaseHelper private constructor(context: Context) :
             }
 
             if (matched) {
-                val label = "[${rule.ruleType.displayName}] $pattern" +
-                        if (rule.note.isNotEmpty()) " (${rule.note})" else ""
+                val label = "${rule.ruleType.displayName} $pattern" +
+                        if (rule.note.isNotEmpty()) " - ${rule.note}" else ""
                 return Pair(true, label)
             }
         }

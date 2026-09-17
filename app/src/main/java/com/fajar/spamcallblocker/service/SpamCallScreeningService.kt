@@ -40,7 +40,7 @@ class SpamCallScreeningService : CallScreeningService() {
         // Private / hidden number
         if (rawNumber.isEmpty() || rawNumber.equals("private", ignoreCase = true) || rawNumber.equals("unknown", ignoreCase = true)) {
             if (prefs.isBlockUnknownPrivateEnabled) {
-                blockCall(callDetails, "Private / Hidden Number", "Unknown Number", prefs, dbHelper)
+                blockCall(callDetails, "Private Number", "Private Number", prefs, dbHelper)
                 return
             }
         }
@@ -61,7 +61,7 @@ class SpamCallScreeningService : CallScreeningService() {
 
         // Block all mode
         if (prefs.isBlockAllCallsEnabled) {
-            blockCall(callDetails, "Block All Calls Mode", rawNumber, prefs, dbHelper)
+            blockCall(callDetails, "Block All Calls mode is active", rawNumber, prefs, dbHelper)
             return
         }
 
@@ -69,7 +69,7 @@ class SpamCallScreeningService : CallScreeningService() {
         if (rawNumber.isNotEmpty()) {
             val (matched, ruleDescription) = dbHelper.checkMatchingRule(rawNumber)
             if (matched) {
-                blockCall(callDetails, ruleDescription ?: "Block Rule", rawNumber, prefs, dbHelper)
+                blockCall(callDetails, ruleDescription ?: "Spam Filter", rawNumber, prefs, dbHelper)
                 return
             }
         }
@@ -135,14 +135,20 @@ class SpamCallScreeningService : CallScreeningService() {
 
         val builder = NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_shield)
-            .setContentTitle("Spam Call Blocked")
-            .setContentText("$phoneNumber ($reason)")
-            .setStyle(NotificationCompat.BigTextStyle()
-                .bigText("Call from $phoneNumber was rejected.\nReason: $reason"))
+            .setContentTitle("Call Blocked")
+            .setContentText(phoneNumber)
+            .setStyle(
+                NotificationCompat.BigTextStyle()
+                    .bigText("Blocked a call from $phoneNumber.\nMatched rule: $reason")
+            )
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setAutoCancel(true)
             .setContentIntent(appPendingIntent)
-            .addAction(R.drawable.ic_check, "Whitelist", whitelistPendingIntent)
+
+        // Only add Allow button if there is a real number
+        if (phoneNumber != "Private Number" && phoneNumber != "Unknown Number") {
+            builder.addAction(R.drawable.ic_check, "Allow Number", whitelistPendingIntent)
+        }
 
         notificationManager.notify(notifId, builder.build())
     }
