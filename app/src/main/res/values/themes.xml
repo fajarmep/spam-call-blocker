@@ -1,0 +1,50 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="Theme.SpamCallBlocker" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Primary brand color -->
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryVariant">@color/primary_variant</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondary">@color/secondary</item>
+        <item name="colorOnSecondary">@color/white</item>
+
+        <!-- Status bar -->
+        <item name="android:statusBarColor">@color/surface_light</item>
+        <item name="android:windowLightStatusBar">true</item>
+
+        <!-- Flat UI Styling: Strict 0dp corners, 0dp elevation -->
+        <item name="shapeAppearanceSmallComponent">@style/ShapeAppearance.Flat</item>
+        <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.Flat</item>
+        <item name="shapeAppearanceLargeComponent">@style/ShapeAppearance.Flat</item>
+
+        <item name="materialCardViewStyle">@style/Widget.App.CardView</item>
+        <item name="materialButtonStyle">@style/Widget.App.Button</item>
+    </style>
+
+    <style name="ShapeAppearance.Flat" parent="">
+        <item name="cornerSize">0dp</item>
+        <item name="cornerFamily">cut</item>
+    </style>
+
+    <style name="Widget.App.CardView" parent="Widget.Material3.CardView.Outlined">
+        <item name="cardElevation">0dp</item>
+        <item name="cardMaxElevation">0dp</item>
+        <item name="cardCornerRadius">0dp</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="strokeColor">@color/border_light</item>
+        <item name="cardBackgroundColor">@color/surface_light</item>
+    </style>
+
+    <style name="Widget.App.Button" parent="Widget.Material3.Button">
+        <item name="cornerRadius">0dp</item>
+        <item name="elevation">0dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+    </style>
+
+    <style name="Widget.App.Button.Outlined" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="cornerRadius">0dp</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+    </style>
+</resources>
