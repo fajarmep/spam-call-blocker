@@ -2,11 +2,15 @@ package com.fajar.spamcallblocker
 
 import android.Manifest
 import android.app.role.RoleManager
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
@@ -15,17 +19,18 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.fajar.spamcallblocker.data.BlockRule
 import com.fajar.spamcallblocker.data.BlockedCall
 import com.fajar.spamcallblocker.data.DatabaseHelper
 import com.fajar.spamcallblocker.data.PreferenceManager
 import com.fajar.spamcallblocker.data.RuleType
-import com.fajar.spamcallblocker.data.WhitelistItem
 import com.fajar.spamcallblocker.databinding.ActivityMainBinding
 import com.fajar.spamcallblocker.ui.HistoryAdapter
 import com.fajar.spamcallblocker.ui.RulesAdapter
 import com.fajar.spamcallblocker.ui.WhitelistAdapter
 import com.google.android.material.tabs.TabLayout
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
 
@@ -37,6 +42,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var whitelistAdapter: WhitelistAdapter
     private lateinit var rulesAdapter: RulesAdapter
 
+    private var allHistory: List<BlockedCall> = emptyList()
+
     private val roleRequestLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             updateRoleStatus()
@@ -45,25 +52,23 @@ class MainActivity : AppCompatActivity() {
     private val requestContactPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
             if (isGranted) {
-                Toast.makeText(this, "Izin kontak diberikan.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Contact permission granted.", Toast.LENGTH_SHORT).show()
                 binding.switchAllowContacts.isChecked = true
                 prefs.isAllowAllContactsEnabled = true
             } else {
-                Toast.makeText(this, "Izin kontak ditolak.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Contact permission denied.", Toast.LENGTH_SHORT).show()
             }
         }
 
     private val requestNotificationPermissionLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { _ ->
-            // Handled
-        }
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { _ -> }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        dbHelper = DatabaseHelper(this)
+        dbHelper = DatabaseHelper.getInstance(this)
         prefs = PreferenceManager(this)
 
         initViews()
@@ -84,9 +89,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initViews() {
-        binding.btnHeaderAction.setOnClickListener {
-            requestCallScreeningRole()
-        }
+        binding.btnHeaderAction.setOnClickListener { requestCallScreeningRole() }
     }
 
     private fun setupTabs() {
@@ -129,73 +132,104 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // --- Tab 1: History ---
+    // --- History ---
     private fun setupHistoryTab() {
         historyAdapter = HistoryAdapter(
             items = emptyList(),
-            onUnblockClick = { item -> handleUnblock(item) },
-            onWhitelistClick = { item -> handleWhitelistFromHistory(item) }
+            onUnblockClick = { handleUnblock(it) },
+            onWhitelistClick = { handleWhitelistFromHistory(it) },
+            onLongClick = { copyToClipboard(it.phoneNumber) }
         )
         binding.rvHistory.layoutManager = LinearLayoutManager(this)
         binding.rvHistory.adapter = historyAdapter
 
         binding.btnClearHistory.setOnClickListener {
             AlertDialog.Builder(this)
-                .setTitle("Hapus Semua Riwayat")
-                .setMessage("Yakin ingin menghapus seluruh log panggilan yang diblokir?")
-                .setPositiveButton("Hapus") { _, _ ->
+                .setTitle("Clear All History")
+                .setMessage("Delete all blocked call records?")
+                .setPositiveButton("Delete") { _, _ ->
                     dbHelper.clearHistory()
                     refreshHistory()
-                    Toast.makeText(this, "Riwayat dibersihkan.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "History cleared.", Toast.LENGTH_SHORT).show()
                 }
-                .setNegativeButton("Batal", null)
+                .setNegativeButton("Cancel", null)
                 .show()
         }
+
+        binding.btnExportHistory.setOnClickListener { shareHistory() }
+
+        // Search filter
+        binding.etHistorySearch.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) {
+                filterHistory(s?.toString() ?: "")
+            }
+        })
 
         refreshHistory()
     }
 
     private fun refreshHistory() {
-        val list = dbHelper.getAllHistory()
-        historyAdapter.updateData(list)
-        binding.tvHistoryCount.text = "${list.size} Panggilan Diblokir"
-        binding.tvEmptyHistory.visibility = if (list.isEmpty()) View.VISIBLE else View.GONE
-        binding.rvHistory.visibility = if (list.isEmpty()) View.GONE else View.VISIBLE
+        allHistory = dbHelper.getAllHistory()
+        val query = binding.etHistorySearch.text?.toString() ?: ""
+        filterHistory(query)
+    }
+
+    private fun filterHistory(query: String) {
+        val filtered = if (query.isBlank()) allHistory
+        else allHistory.filter { it.phoneNumber.contains(query, ignoreCase = true) || it.reason.contains(query, ignoreCase = true) }
+        historyAdapter.updateData(filtered)
+        binding.tvHistoryCount.text = "${filtered.size} Blocked Calls"
+        binding.tvEmptyHistory.visibility = if (filtered.isEmpty()) View.VISIBLE else View.GONE
+        binding.rvHistory.visibility = if (filtered.isEmpty()) View.GONE else View.VISIBLE
     }
 
     private fun handleUnblock(item: BlockedCall) {
-        val deletedRules = dbHelper.removeRuleByNumberMatch(item.phoneNumber)
+        // Bug fix: only delete history entry, never delete rules
         dbHelper.deleteHistoryItem(item.id)
         refreshHistory()
-        val msg = if (deletedRules > 0) {
-            "Nomor ${item.phoneNumber} di-unblock ($deletedRules aturan terkait dihapus)."
-        } else {
-            "Nomor ${item.phoneNumber} dihapus dari riwayat blokir."
-        }
-        Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "${item.phoneNumber} removed from history.", Toast.LENGTH_SHORT).show()
     }
 
     private fun handleWhitelistFromHistory(item: BlockedCall) {
-        val success = dbHelper.insertWhitelist(item.phoneNumber, "Dari Riwayat Blokir")
+        val success = dbHelper.insertWhitelist(item.phoneNumber, "From History")
         if (success) {
             dbHelper.deleteHistoryItem(item.id)
             refreshHistory()
-            Toast.makeText(
-                this,
-                "Nomor ${item.phoneNumber} berhasil ditambahkan ke Whitelist.",
-                Toast.LENGTH_SHORT
-            ).show()
+            Toast.makeText(this, "${item.phoneNumber} added to Whitelist.", Toast.LENGTH_SHORT).show()
         }
     }
 
-    // --- Tab 2: Whitelist ---
+    private fun copyToClipboard(text: String) {
+        val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        clipboard.setPrimaryClip(ClipData.newPlainText("Phone Number", text))
+        Toast.makeText(this, "Copied: $text", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun shareHistory() {
+        val dateFormat = SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault())
+        val lines = allHistory.joinToString("\n") { "${it.phoneNumber} — ${dateFormat.format(Date(it.timestamp))} — ${it.reason}" }
+        if (lines.isBlank()) {
+            Toast.makeText(this, "No history to share.", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_SUBJECT, "Blocked Call Log")
+            putExtra(Intent.EXTRA_TEXT, "Blocked Call Log:\n\n$lines")
+        }
+        startActivity(Intent.createChooser(intent, "Share Blocked Call Log"))
+    }
+
+    // --- Whitelist ---
     private fun setupWhitelistTab() {
         whitelistAdapter = WhitelistAdapter(
             items = emptyList(),
             onDeleteClick = { item ->
                 dbHelper.deleteWhitelistItem(item.id)
                 refreshWhitelist()
-                Toast.makeText(this, "Nomor dihapus dari Whitelist.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Removed from Whitelist.", Toast.LENGTH_SHORT).show()
             }
         )
         binding.rvWhitelist.layoutManager = LinearLayoutManager(this)
@@ -215,19 +249,18 @@ class MainActivity : AppCompatActivity() {
             val phone = binding.etWhitelistNumber.text.toString().trim()
             val note = binding.etWhitelistNote.text.toString().trim()
             if (phone.isEmpty()) {
-                binding.etWhitelistNumber.error = "Nomor tidak boleh kosong"
+                binding.etWhitelistNumber.error = "Phone number required"
                 return@setOnClickListener
             }
-
             val success = dbHelper.insertWhitelist(phone, note)
             if (success) {
                 binding.etWhitelistNumber.text?.clear()
                 binding.etWhitelistNote.text?.clear()
                 hideKeyboard()
                 refreshWhitelist()
-                Toast.makeText(this, "Nomor ditambahkan ke Whitelist.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Added to Whitelist.", Toast.LENGTH_SHORT).show()
             } else {
-                Toast.makeText(this, "Gagal menambahkan nomor.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Failed to add number.", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -237,19 +270,19 @@ class MainActivity : AppCompatActivity() {
     private fun refreshWhitelist() {
         val list = dbHelper.getAllWhitelist()
         whitelistAdapter.updateData(list)
-        binding.tvWhitelistCount.text = "Daftar Nomor Whitelist (${list.size})"
+        binding.tvWhitelistCount.text = "Whitelist Numbers (${list.size})"
         binding.tvEmptyWhitelist.visibility = if (list.isEmpty()) View.VISIBLE else View.GONE
         binding.rvWhitelist.visibility = if (list.isEmpty()) View.GONE else View.VISIBLE
     }
 
-    // --- Tab 3: Rules ---
+    // --- Rules ---
     private fun setupRulesTab() {
         rulesAdapter = RulesAdapter(
             items = emptyList(),
             onDeleteClick = { rule ->
                 dbHelper.deleteBlockRule(rule.id)
                 refreshRules()
-                Toast.makeText(this, "Aturan blokir dihapus.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Block rule deleted.", Toast.LENGTH_SHORT).show()
             }
         )
         binding.rvRules.layoutManager = LinearLayoutManager(this)
@@ -259,7 +292,7 @@ class MainActivity : AppCompatActivity() {
             val pattern = binding.etRulePattern.text.toString().trim()
             val note = binding.etRuleNote.text.toString().trim()
             if (pattern.isEmpty()) {
-                binding.etRulePattern.error = "Pola nomor tidak boleh kosong"
+                binding.etRulePattern.error = "Pattern required"
                 return@setOnClickListener
             }
 
@@ -277,9 +310,9 @@ class MainActivity : AppCompatActivity() {
                 binding.etRuleNote.text?.clear()
                 hideKeyboard()
                 refreshRules()
-                Toast.makeText(this, "Aturan baru berhasil disimpan.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Rule saved.", Toast.LENGTH_SHORT).show()
             } else {
-                Toast.makeText(this, "Gagal menyimpan aturan.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Failed to save rule.", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -289,12 +322,12 @@ class MainActivity : AppCompatActivity() {
     private fun refreshRules() {
         val list = dbHelper.getAllRules()
         rulesAdapter.updateData(list)
-        binding.tvRulesCount.text = "Aturan Blokir Aktif (${list.size})"
+        binding.tvRulesCount.text = "Active Block Rules (${list.size})"
         binding.tvEmptyRules.visibility = if (list.isEmpty()) View.VISIBLE else View.GONE
         binding.rvRules.visibility = if (list.isEmpty()) View.GONE else View.VISIBLE
     }
 
-    // --- Tab 4: Settings ---
+    // --- Settings ---
     private fun setupSettingsTab() {
         binding.switchMaster.isChecked = prefs.isServiceEnabled
         binding.switchMaster.setOnCheckedChangeListener { _, isChecked ->
@@ -317,9 +350,7 @@ class MainActivity : AppCompatActivity() {
             prefs.isNotificationEnabled = isChecked
         }
 
-        binding.btnRequestRole.setOnClickListener {
-            requestCallScreeningRole()
-        }
+        binding.btnRequestRole.setOnClickListener { requestCallScreeningRole() }
 
         binding.btnCheckContactPermission.setOnClickListener {
             requestContactPermissionLauncher.launch(Manifest.permission.READ_CONTACTS)
@@ -327,17 +358,17 @@ class MainActivity : AppCompatActivity() {
 
         binding.btnApplyCommonSpamPresets.setOnClickListener {
             AlertDialog.Builder(this)
-                .setTitle("Terapkan Preset Spam Umum")
-                .setMessage("Tambahkan filter awalan 021 (telemarketing), +1 (VoIP bot), dan awalan umum panggilan spam?")
-                .setPositiveButton("Tambahkan") { _, _ ->
-                    dbHelper.insertBlockRule(RuleType.STARTS_WITH, "021", "Telemarketing Lokal")
-                    dbHelper.insertBlockRule(RuleType.STARTS_WITH, "+1", "Bot Luar Negeri (US/CA)")
-                    dbHelper.insertBlockRule(RuleType.STARTS_WITH, "140", "Promo Bank/Korporat")
-                    dbHelper.insertBlockRule(RuleType.STARTS_WITH, "150", "Call Center Korporat")
+                .setTitle("Apply Common Spam Presets")
+                .setMessage("Add filters for 021 (telemarketing), +1 (VoIP bots), 140 and 150 (corporate)?")
+                .setPositiveButton("Add") { _, _ ->
+                    dbHelper.insertBlockRule(RuleType.STARTS_WITH, "021", "Local Telemarketing")
+                    dbHelper.insertBlockRule(RuleType.STARTS_WITH, "+1", "Foreign Bot (US/CA)")
+                    dbHelper.insertBlockRule(RuleType.STARTS_WITH, "140", "Bank/Corporate Promo")
+                    dbHelper.insertBlockRule(RuleType.STARTS_WITH, "150", "Corporate Call Center")
                     refreshRules()
-                    Toast.makeText(this, "Preset berhasil ditambahkan.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Presets added.", Toast.LENGTH_SHORT).show()
                 }
-                .setNegativeButton("Batal", null)
+                .setNegativeButton("Cancel", null)
                 .show()
         }
     }
@@ -348,26 +379,34 @@ class MainActivity : AppCompatActivity() {
         binding.switchBlockAll.isChecked = prefs.isBlockAllCallsEnabled
         binding.switchNotification.isChecked = prefs.isNotificationEnabled
         binding.switchAllowContacts.isChecked = prefs.isAllowAllContactsEnabled
+
+        // Stats
+        val histCount = dbHelper.getHistoryCount()
+        val ruleCount = dbHelper.getRuleCount()
+        val whiteCount = dbHelper.getWhitelistCount()
+        binding.tvStatsContent.text = "Blocked calls:     $histCount\nActive rules:      $ruleCount\nWhitelist entries: $whiteCount"
     }
 
-    // --- Call Screening Role & Permissions ---
+    // --- Role & Permissions ---
     private fun updateRoleStatus() {
         val isHeld = isCallScreeningRoleHeld()
         if (isHeld) {
-            binding.tvHeaderStatus.text = "Layanan Call Screening: AKTIF"
+            binding.tvHeaderStatus.text = "Call Screening: ACTIVE"
             binding.tvHeaderStatus.setTextColor(ContextCompat.getColor(this, R.color.accent_green))
-            binding.btnHeaderAction.text = "Aktif"
+            binding.viewStatusDot.setBackgroundColor(ContextCompat.getColor(this, R.color.accent_green))
+            binding.btnHeaderAction.text = "Active"
             binding.btnHeaderAction.isEnabled = false
-            binding.tvSettingsRoleStatus.text = "Status: Layanan Call Screening telah disetujui sistem Android."
-            binding.btnRequestRole.text = "Izin Telah Diberikan"
+            binding.tvSettingsRoleStatus.text = "Status: Call Screening permission granted."
+            binding.btnRequestRole.text = "Permission Granted"
             binding.btnRequestRole.isEnabled = false
         } else {
-            binding.tvHeaderStatus.text = "Layanan Call Screening Belum Diizinkan"
+            binding.tvHeaderStatus.text = "Call Screening Not Authorized"
             binding.tvHeaderStatus.setTextColor(ContextCompat.getColor(this, R.color.primary))
-            binding.btnHeaderAction.text = "Aktifkan"
+            binding.viewStatusDot.setBackgroundColor(ContextCompat.getColor(this, R.color.primary))
+            binding.btnHeaderAction.text = "Activate"
             binding.btnHeaderAction.isEnabled = true
-            binding.tvSettingsRoleStatus.text = "Aplikasi memerlukan izin Call Screening agar sistem Android mengizinkan pemblokiran otomatis."
-            binding.btnRequestRole.text = "Beri Izin Call Screening"
+            binding.tvSettingsRoleStatus.text = "App needs Call Screening permission for automatic blocking."
+            binding.btnRequestRole.text = "Grant Permission"
             binding.btnRequestRole.isEnabled = true
         }
     }
@@ -385,13 +424,12 @@ class MainActivity : AppCompatActivity() {
             val roleManager = getSystemService(Context.ROLE_SERVICE) as? RoleManager
             if (roleManager != null && roleManager.isRoleAvailable(RoleManager.ROLE_CALL_SCREENING)) {
                 if (!roleManager.isRoleHeld(RoleManager.ROLE_CALL_SCREENING)) {
-                    val intent = roleManager.createRequestRoleIntent(RoleManager.ROLE_CALL_SCREENING)
-                    roleRequestLauncher.launch(intent)
+                    roleRequestLauncher.launch(roleManager.createRequestRoleIntent(RoleManager.ROLE_CALL_SCREENING))
                     return
                 }
             }
         }
-        Toast.makeText(this, "Izin Call Screening aktif.", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "Call Screening permission active.", Toast.LENGTH_SHORT).show()
     }
 
     private fun checkRequiredPermissions() {
@@ -407,7 +445,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun hideKeyboard() {
         val view = currentFocus ?: binding.root
-        val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
-        imm?.hideSoftInputFromWindow(view.windowToken, 0)
+        (getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager)?.hideSoftInputFromWindow(view.windowToken, 0)
     }
 }

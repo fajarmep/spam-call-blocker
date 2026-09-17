@@ -13,6 +13,7 @@ class PreferenceManager(context: Context) {
         private const val KEY_BLOCK_UNKNOWN_PRIVATE = "key_block_unknown_private"
         private const val KEY_BLOCK_ALL_CALLS = "key_block_all_calls"
         private const val KEY_SHOW_NOTIFICATION = "key_show_notification"
+        private const val KEY_NOTIF_COUNTER = "key_notif_counter"
     }
 
     var isServiceEnabled: Boolean
@@ -34,4 +35,11 @@ class PreferenceManager(context: Context) {
     var isNotificationEnabled: Boolean
         get() = prefs.getBoolean(KEY_SHOW_NOTIFICATION, true)
         set(value) = prefs.edit().putBoolean(KEY_SHOW_NOTIFICATION, value).apply()
+
+    fun nextNotificationId(): Int {
+        val current = prefs.getInt(KEY_NOTIF_COUNTER, 1000)
+        val next = if (current >= 99999) 1000 else current + 1
+        prefs.edit().putInt(KEY_NOTIF_COUNTER, next).apply()
+        return current
+    }
 }

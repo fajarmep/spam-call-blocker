@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.fajar.spamcallblocker.R
 import com.fajar.spamcallblocker.data.WhitelistItem
@@ -34,14 +35,19 @@ class WhitelistAdapter(
         } else {
             holder.tvWhiteNote.visibility = View.GONE
         }
-
         holder.btnDeleteWhite.setOnClickListener { onDeleteClick(item) }
     }
 
     override fun getItemCount(): Int = items.size
 
     fun updateData(newItems: List<WhitelistItem>) {
+        val diff = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
+            override fun getOldListSize() = items.size
+            override fun getNewListSize() = newItems.size
+            override fun areItemsTheSame(o: Int, n: Int) = items[o].id == newItems[n].id
+            override fun areContentsTheSame(o: Int, n: Int) = items[o] == newItems[n]
+        })
         items = newItems
-        notifyDataSetChanged()
+        diff.dispatchUpdatesTo(this)
     }
 }

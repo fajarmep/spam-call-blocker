@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Brand (same in dark) -->
+    <color name="primary">#E53935</color>
+    <color name="primary_variant">#C62828</color>
+    <color name="secondary">#58A6FF</color>
+    <color name="accent_green">#3FB950</color>
+
+    <!-- Dark mode surfaces -->
+    <color name="bg">#0D1117</color>
+    <color name="surface">#161B22</color>
+    <color name="border">#30363D</color>
+    <color name="text_primary">#E6EDF3</color>
+    <color name="text_secondary">#8B949E</color>
+    <color name="badge_warn_bg">#2D1518</color>
+    <color name="badge_info_bg">#162338</color>
+    <color name="accent_border">#E53935</color>
+
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+</resources>

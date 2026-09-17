@@ -20,20 +20,13 @@ class CallNotificationReceiver : BroadcastReceiver() {
             val phone = intent.getStringExtra(EXTRA_PHONE_NUMBER) ?: return
             val notifId = intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1)
 
-            val dbHelper = DatabaseHelper(context)
-            dbHelper.insertWhitelist(phone, "Dari Notifikasi")
+            DatabaseHelper.getInstance(context).insertWhitelist(phone, "From Notification")
 
             if (notifId != -1) {
-                val notificationManager =
-                    context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                notificationManager.cancel(notifId)
+                (context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancel(notifId)
             }
 
-            Toast.makeText(
-                context,
-                "Nomor $phone ditambahkan ke Whitelist",
-                Toast.LENGTH_SHORT
-            ).show()
+            Toast.makeText(context, "$phone added to Whitelist", Toast.LENGTH_SHORT).show()
         }
     }
 }

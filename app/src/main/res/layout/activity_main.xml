@@ -5,9 +5,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="?android:attr/colorBackground">
+    android:background="@color/bg">
 
-    <!-- App Bar / Header -->
+    <!-- Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -17,7 +17,15 @@
         android:paddingEnd="16dp"
         android:paddingTop="12dp"
         android:paddingBottom="12dp"
-        android:background="?android:attr/colorBackground">
+        android:background="@color/surface">
+
+        <ImageView
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:src="@drawable/ic_shield"
+            android:layout_marginEnd="10dp"
+            app:tint="@color/primary"
+            android:contentDescription="Shield" />
 
         <LinearLayout
             android:layout_width="0dp"
@@ -28,19 +36,33 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Spam Call Blocker"
+                android:text="@string/app_name"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                android:textColor="?android:attr/textColorPrimary" />
+                android:textColor="@color/text_primary" />
 
-            <TextView
-                android:id="@+id/tvHeaderStatus"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:text="Layanan Belum Aktif"
-                android:textSize="12sp"
-                android:textColor="@color/primary" />
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:layout_marginTop="2dp">
+
+                <View
+                    android:id="@+id/viewStatusDot"
+                    android:layout_width="8dp"
+                    android:layout_height="8dp"
+                    android:layout_marginEnd="6dp"
+                    android:background="@color/primary" />
+
+                <TextView
+                    android:id="@+id/tvHeaderStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Service Inactive"
+                    android:textSize="12sp"
+                    android:textColor="@color/text_secondary" />
+            </LinearLayout>
         </LinearLayout>
 
         <com.google.android.material.button.MaterialButton
@@ -51,7 +73,7 @@
             android:minHeight="0dp"
             android:paddingStart="12dp"
             android:paddingEnd="12dp"
-            android:text="Aktifkan"
+            android:text="Activate"
             android:textSize="12sp"
             app:cornerRadius="0dp" />
     </LinearLayout>
@@ -59,142 +81,184 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@color/border_light" />
+        android:background="@color/border" />
 
-    <!-- Navigation Tabs -->
+    <!-- Tabs with icons -->
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tabLayout"
         android:layout_width="match_parent"
-        android:layout_height="44dp"
+        android:layout_height="wrap_content"
+        android:background="@color/surface"
         app:tabIndicatorColor="@color/primary"
         app:tabIndicatorHeight="3dp"
         app:tabMode="fixed"
         app:tabGravity="fill"
         app:tabSelectedTextColor="@color/primary"
-        app:tabTextColor="?android:attr/textColorSecondary"
+        app:tabTextColor="@color/text_secondary"
+        app:tabIconTint="@null"
+        app:tabInlineLabel="true"
         app:tabTextAppearance="@android:style/TextAppearance.Small">
 
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Riwayat" />
+            android:icon="@drawable/ic_tab_history"
+            android:text="History" />
 
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:icon="@drawable/ic_tab_whitelist"
             android:text="Whitelist" />
 
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Aturan" />
+            android:icon="@drawable/ic_tab_rules"
+            android:text="Rules" />
 
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Pengaturan" />
+            android:icon="@drawable/ic_tab_settings"
+            android:text="Settings" />
     </com.google.android.material.tabs.TabLayout>
 
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@color/border_light" />
+        android:background="@color/border" />
 
-    <!-- Content Views Container -->
+    <!-- Content -->
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
 
-        <!-- ================= TAB 1: RIWAYAT (HISTORY) ================= -->
-        <LinearLayout
+        <!-- TAB 1: HISTORY -->
+        <androidx.core.widget.NestedScrollView
             android:id="@+id/layoutHistory"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:padding="16dp"
             android:visibility="visible">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:layout_marginBottom="12dp">
+                android:orientation="vertical"
+                android:padding="16dp">
 
-                <TextView
-                    android:id="@+id/tvHistoryCount"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="0 Panggilan Diblokir"
-                    android:textSize="14sp"
-                    android:textStyle="bold"
-                    android:textColor="?android:attr/textColorPrimary" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnClearHistory"
-                    style="@style/Widget.App.Button.Outlined"
-                    android:layout_width="wrap_content"
-                    android:layout_height="32dp"
-                    android:minHeight="0dp"
+                <!-- Search bar -->
+                <EditText
+                    android:id="@+id/etHistorySearch"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:background="@drawable/edittext_border"
+                    android:hint="Search history…"
+                    android:inputType="text"
                     android:paddingStart="10dp"
                     android:paddingEnd="10dp"
-                    android:text="Hapus Semua"
-                    android:textSize="11sp"
-                    android:textColor="@color/primary"
-                    app:strokeColor="@color/primary"
-                    app:cornerRadius="0dp" />
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/tvEmptyHistory"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="48dp"
-                android:gravity="center"
-                android:text="Belum ada panggilan spam yang diblokir."
-                android:textColor="?android:attr/textColorSecondary"
-                android:textSize="14sp"
-                android:visibility="gone" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvHistory"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                tools:listitem="@layout/item_history" />
-        </LinearLayout>
-
-        <!-- ================= TAB 2: WHITELIST ================= -->
-        <LinearLayout
-            android:id="@+id/layoutWhitelist"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:padding="16dp"
-            android:visibility="gone">
-
-            <!-- Checkbox Kontak Whitelist -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="0dp"
-                app:cardElevation="0dp"
-                app:strokeWidth="1dp"
-                app:strokeColor="@color/border_light">
+                    android:textSize="13sp"
+                    android:textColor="@color/text_primary"
+                    android:textColorHint="@color/text_secondary"
+                    android:layout_marginBottom="12dp"
+                    android:drawableStart="@drawable/ic_clear"
+                    android:drawablePadding="8dp" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="12dp">
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="12dp">
+
+                    <TextView
+                        android:id="@+id/tvHistoryCount"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="0 Blocked Calls"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/text_primary" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnExportHistory"
+                        style="@style/Widget.App.Button.Outlined"
+                        android:layout_width="wrap_content"
+                        android:layout_height="32dp"
+                        android:minHeight="0dp"
+                        android:paddingStart="10dp"
+                        android:paddingEnd="10dp"
+                        android:text="Share"
+                        android:textSize="11sp"
+                        app:cornerRadius="0dp"
+                        android:layout_marginEnd="8dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnClearHistory"
+                        style="@style/Widget.App.Button.Outlined"
+                        android:layout_width="wrap_content"
+                        android:layout_height="32dp"
+                        android:minHeight="0dp"
+                        android:paddingStart="10dp"
+                        android:paddingEnd="10dp"
+                        android:text="Clear All"
+                        android:textSize="11sp"
+                        android:textColor="@color/primary"
+                        app:strokeColor="@color/primary"
+                        app:cornerRadius="0dp" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tvEmptyHistory"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="48dp"
+                    android:gravity="center"
+                    android:text="No blocked calls yet."
+                    android:textColor="@color/text_secondary"
+                    android:textSize="14sp"
+                    android:visibility="gone" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvHistory"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="false"
+                    tools:listitem="@layout/item_history" />
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+
+        <!-- TAB 2: WHITELIST -->
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/layoutWhitelist"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <!-- Allow contacts switch -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    app:cardCornerRadius="0dp"
+                    app:cardElevation="0dp"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="@color/border">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center_vertical"
-                        android:orientation="horizontal">
+                        android:orientation="horizontal"
+                        android:padding="12dp">
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -205,18 +269,18 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Izinkan Semua Kontak Tersimpan"
+                                android:text="Allow All Saved Contacts"
                                 android:textSize="14sp"
                                 android:textStyle="bold"
-                                android:textColor="?android:attr/textColorPrimary" />
+                                android:textColor="@color/text_primary" />
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="2dp"
-                                android:text="Semua nomor di buku kontak tidak akan diblokir."
+                                android:text="Contacts in your phonebook will never be blocked."
                                 android:textSize="12sp"
-                                android:textColor="?android:attr/textColorSecondary" />
+                                android:textColor="@color/text_secondary" />
                         </LinearLayout>
 
                         <com.google.android.material.switchmaterial.SwitchMaterial
@@ -225,232 +289,249 @@
                             android:layout_height="wrap_content"
                             android:checked="true" />
                     </LinearLayout>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+                </com.google.android.material.card.MaterialCardView>
 
-            <!-- Card Tambah Manual Whitelist -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="0dp"
-                app:cardElevation="0dp"
-                app:strokeWidth="1dp"
-                app:strokeColor="@color/border_light">
-
-                <LinearLayout
+                <!-- Add whitelist form -->
+                <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="12dp">
+                    android:layout_marginBottom="16dp"
+                    app:cardCornerRadius="0dp"
+                    app:cardElevation="0dp"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="@color/border">
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Tambah Whitelist Manual"
-                        android:textSize="14sp"
-                        android:textStyle="bold"
-                        android:layout_marginBottom="8dp"
-                        android:textColor="?android:attr/textColorPrimary" />
+                        android:orientation="vertical"
+                        android:padding="12dp">
 
-                    <EditText
-                        android:id="@+id/etWhitelistNumber"
-                        android:layout_width="match_parent"
-                        android:layout_height="42dp"
-                        android:background="@drawable/edittext_border"
-                        android:hint="Nomor telepon (misal: 08123456789)"
-                        android:inputType="phone"
-                        android:paddingStart="10dp"
-                        android:paddingEnd="10dp"
-                        android:textSize="13sp"
-                        android:layout_marginBottom="8dp" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Add to Whitelist"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            android:layout_marginBottom="8dp"
+                            android:textColor="@color/text_primary" />
 
-                    <EditText
-                        android:id="@+id/etWhitelistNote"
-                        android:layout_width="match_parent"
-                        android:layout_height="42dp"
-                        android:background="@drawable/edittext_border"
-                        android:hint="Catatan / Nama (opsional)"
-                        android:inputType="text"
-                        android:paddingStart="10dp"
-                        android:paddingEnd="10dp"
-                        android:textSize="13sp"
-                        android:layout_marginBottom="10dp" />
+                        <EditText
+                            android:id="@+id/etWhitelistNumber"
+                            android:layout_width="match_parent"
+                            android:layout_height="42dp"
+                            android:background="@drawable/edittext_border"
+                            android:hint="Phone number (e.g. +1234567890)"
+                            android:inputType="phone"
+                            android:paddingStart="10dp"
+                            android:paddingEnd="10dp"
+                            android:textSize="13sp"
+                            android:textColor="@color/text_primary"
+                            android:textColorHint="@color/text_secondary"
+                            android:layout_marginBottom="8dp" />
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnAddWhitelist"
-                        style="@style/Widget.App.Button"
-                        android:layout_width="match_parent"
-                        android:layout_height="40dp"
-                        android:text="+ Tambah ke Whitelist"
-                        android:textSize="13sp"
-                        app:cornerRadius="0dp" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+                        <EditText
+                            android:id="@+id/etWhitelistNote"
+                            android:layout_width="match_parent"
+                            android:layout_height="42dp"
+                            android:background="@drawable/edittext_border"
+                            android:hint="Note / Name (optional)"
+                            android:inputType="text"
+                            android:paddingStart="10dp"
+                            android:paddingEnd="10dp"
+                            android:textSize="13sp"
+                            android:textColor="@color/text_primary"
+                            android:textColorHint="@color/text_secondary"
+                            android:layout_marginBottom="10dp" />
 
-            <TextView
-                android:id="@+id/tvWhitelistCount"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:text="Daftar Nomor Whitelist (0)"
-                android:textSize="13sp"
-                android:textStyle="bold"
-                android:textColor="?android:attr/textColorPrimary" />
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnAddWhitelist"
+                            style="@style/Widget.App.Button"
+                            android:layout_width="match_parent"
+                            android:layout_height="40dp"
+                            android:text="+ Add to Whitelist"
+                            android:textSize="13sp"
+                            app:cornerRadius="0dp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
 
-            <TextView
-                android:id="@+id/tvEmptyWhitelist"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:gravity="center"
-                android:text="Belum ada nomor di daftar whitelist manual."
-                android:textColor="?android:attr/textColorSecondary"
-                android:textSize="13sp"
-                android:visibility="gone" />
+                <TextView
+                    android:id="@+id/tvWhitelistCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:text="Whitelist Numbers (0)"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_primary" />
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvWhitelist"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                tools:listitem="@layout/item_whitelist" />
-        </LinearLayout>
+                <TextView
+                    android:id="@+id/tvEmptyWhitelist"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:gravity="center"
+                    android:text="No whitelist entries yet."
+                    android:textColor="@color/text_secondary"
+                    android:textSize="13sp"
+                    android:visibility="gone" />
 
-        <!-- ================= TAB 3: ATURAN BLOKIR (RULES) ================= -->
-        <LinearLayout
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvWhitelist"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="false"
+                    tools:listitem="@layout/item_whitelist" />
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+
+        <!-- TAB 3: RULES -->
+        <androidx.core.widget.NestedScrollView
             android:id="@+id/layoutRules"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:padding="16dp"
             android:visibility="gone">
 
-            <!-- Card Tambah Aturan -->
-            <com.google.android.material.card.MaterialCardView
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="0dp"
-                app:cardElevation="0dp"
-                app:strokeWidth="1dp"
-                app:strokeColor="@color/border_light">
+                android:orientation="vertical"
+                android:padding="16dp">
 
-                <LinearLayout
+                <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="12dp">
+                    android:layout_marginBottom="16dp"
+                    app:cardCornerRadius="0dp"
+                    app:cardElevation="0dp"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="@color/border">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Tambah Aturan Pemblokiran"
-                        android:textSize="14sp"
-                        android:textStyle="bold"
-                        android:layout_marginBottom="8dp"
-                        android:textColor="?android:attr/textColorPrimary" />
-
-                    <!-- 3 Pilihan Opsi Aturan -->
-                    <RadioGroup
-                        android:id="@+id/rgRuleType"
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp">
+                        android:orientation="vertical"
+                        android:padding="12dp">
 
-                        <RadioButton
-                            android:id="@+id/rbStartsWith"
+                        <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:checked="true"
-                            android:text="Numbers that start with (Awalan)"
-                            android:textSize="13sp" />
+                            android:text="Add Blocking Rule"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            android:layout_marginBottom="8dp"
+                            android:textColor="@color/text_primary" />
 
-                        <RadioButton
-                            android:id="@+id/rbContains"
-                            android:layout_width="wrap_content"
+                        <RadioGroup
+                            android:id="@+id/rgRuleType"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Number that contain (Mengandung)"
-                            android:textSize="13sp" />
+                            android:layout_marginBottom="8dp">
 
-                        <RadioButton
-                            android:id="@+id/rbEndsWith"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Number that end with (Akhiran)"
-                            android:textSize="13sp" />
+                            <RadioButton
+                                android:id="@+id/rbStartsWith"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:checked="true"
+                                android:text="Starts with"
+                                android:textSize="13sp"
+                                android:textColor="@color/text_primary" />
 
-                        <RadioButton
-                            android:id="@+id/rbExact"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Nomor Spesifik (Persis sama)"
-                            android:textSize="13sp" />
-                    </RadioGroup>
+                            <RadioButton
+                                android:id="@+id/rbContains"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Contains"
+                                android:textSize="13sp"
+                                android:textColor="@color/text_primary" />
 
-                    <EditText
-                        android:id="@+id/etRulePattern"
-                        android:layout_width="match_parent"
-                        android:layout_height="42dp"
-                        android:background="@drawable/edittext_border"
-                        android:hint="Pola nomor (contoh: 021 atau +1 atau 888)"
-                        android:inputType="phone"
-                        android:paddingStart="10dp"
-                        android:paddingEnd="10dp"
-                        android:textSize="13sp"
-                        android:layout_marginBottom="8dp" />
+                            <RadioButton
+                                android:id="@+id/rbEndsWith"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Ends with"
+                                android:textSize="13sp"
+                                android:textColor="@color/text_primary" />
 
-                    <EditText
-                        android:id="@+id/etRuleNote"
-                        android:layout_width="match_parent"
-                        android:layout_height="42dp"
-                        android:background="@drawable/edittext_border"
-                        android:hint="Label / Keterangan aturan (opsional)"
-                        android:inputType="text"
-                        android:paddingStart="10dp"
-                        android:paddingEnd="10dp"
-                        android:textSize="13sp"
-                        android:layout_marginBottom="10dp" />
+                            <RadioButton
+                                android:id="@+id/rbExact"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Exact match"
+                                android:textSize="13sp"
+                                android:textColor="@color/text_primary" />
+                        </RadioGroup>
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnAddRule"
-                        style="@style/Widget.App.Button"
-                        android:layout_width="match_parent"
-                        android:layout_height="40dp"
-                        android:text="+ Simpan Aturan"
-                        android:textSize="13sp"
-                        app:cornerRadius="0dp" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+                        <EditText
+                            android:id="@+id/etRulePattern"
+                            android:layout_width="match_parent"
+                            android:layout_height="42dp"
+                            android:background="@drawable/edittext_border"
+                            android:hint="Number pattern (e.g. 021, +1, 888)"
+                            android:inputType="phone"
+                            android:paddingStart="10dp"
+                            android:paddingEnd="10dp"
+                            android:textSize="13sp"
+                            android:textColor="@color/text_primary"
+                            android:textColorHint="@color/text_secondary"
+                            android:layout_marginBottom="8dp" />
 
-            <TextView
-                android:id="@+id/tvRulesCount"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:text="Aturan Blokir Aktif (0)"
-                android:textSize="13sp"
-                android:textStyle="bold"
-                android:textColor="?android:attr/textColorPrimary" />
+                        <EditText
+                            android:id="@+id/etRuleNote"
+                            android:layout_width="match_parent"
+                            android:layout_height="42dp"
+                            android:background="@drawable/edittext_border"
+                            android:hint="Label / Note (optional)"
+                            android:inputType="text"
+                            android:paddingStart="10dp"
+                            android:paddingEnd="10dp"
+                            android:textSize="13sp"
+                            android:textColor="@color/text_primary"
+                            android:textColorHint="@color/text_secondary"
+                            android:layout_marginBottom="10dp" />
 
-            <TextView
-                android:id="@+id/tvEmptyRules"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:gravity="center"
-                android:text="Belum ada aturan pemblokiran dibuat."
-                android:textColor="?android:attr/textColorSecondary"
-                android:textSize="13sp"
-                android:visibility="gone" />
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnAddRule"
+                            style="@style/Widget.App.Button"
+                            android:layout_width="match_parent"
+                            android:layout_height="40dp"
+                            android:text="+ Save Rule"
+                            android:textSize="13sp"
+                            app:cornerRadius="0dp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvRules"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                tools:listitem="@layout/item_rule" />
-        </LinearLayout>
+                <TextView
+                    android:id="@+id/tvRulesCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:text="Active Block Rules (0)"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_primary" />
 
-        <!-- ================= TAB 4: PENGATURAN (SETTINGS) ================= -->
+                <TextView
+                    android:id="@+id/tvEmptyRules"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:gravity="center"
+                    android:text="No blocking rules created yet."
+                    android:textColor="@color/text_secondary"
+                    android:textSize="13sp"
+                    android:visibility="gone" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvRules"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="false"
+                    tools:listitem="@layout/item_rule" />
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+
+        <!-- TAB 4: SETTINGS -->
         <ScrollView
             android:id="@+id/layoutSettings"
             android:layout_width="match_parent"
@@ -463,7 +544,7 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
-                <!-- Service Status Card -->
+                <!-- Call Screening Permission -->
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -471,7 +552,7 @@
                     app:cardCornerRadius="0dp"
                     app:cardElevation="0dp"
                     app:strokeWidth="1dp"
-                    app:strokeColor="@color/border_light">
+                    app:strokeColor="@color/border">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -482,19 +563,19 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Izin Call Screening Default"
+                            android:text="Call Screening Permission"
                             android:textSize="14sp"
                             android:textStyle="bold"
-                            android:textColor="?android:attr/textColorPrimary" />
+                            android:textColor="@color/text_primary" />
 
                         <TextView
                             android:id="@+id/tvSettingsRoleStatus"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
-                            android:text="Aplikasi memerlukan izin Call Screening agar sistem Android mengizinkan pemblokiran otomatis."
+                            android:text="App needs Call Screening permission for automatic blocking."
                             android:textSize="12sp"
-                            android:textColor="?android:attr/textColorSecondary" />
+                            android:textColor="@color/text_secondary" />
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btnRequestRole"
@@ -503,7 +584,7 @@
                             android:layout_height="36dp"
                             android:layout_marginTop="10dp"
                             android:minHeight="0dp"
-                            android:text="Beri Izin Call Screening"
+                            android:text="Grant Permission"
                             android:textSize="12sp"
                             app:cornerRadius="0dp" />
                     </LinearLayout>
@@ -517,7 +598,7 @@
                     app:cardCornerRadius="0dp"
                     app:cardElevation="0dp"
                     app:strokeWidth="1dp"
-                    app:strokeColor="@color/border_light">
+                    app:strokeColor="@color/border">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -535,18 +616,18 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Aktifkan Pemblokir Panggilan"
+                                android:text="Enable Call Blocker"
                                 android:textSize="14sp"
                                 android:textStyle="bold"
-                                android:textColor="?android:attr/textColorPrimary" />
+                                android:textColor="@color/text_primary" />
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="2dp"
-                                android:text="Saklar utama untuk mengaktifkan fungsi blokir."
+                                android:text="Master switch to enable blocking."
                                 android:textSize="12sp"
-                                android:textColor="?android:attr/textColorSecondary" />
+                                android:textColor="@color/text_secondary" />
                         </LinearLayout>
 
                         <com.google.android.material.switchmaterial.SwitchMaterial
@@ -557,7 +638,7 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Toggle Unknown / Private -->
+                <!-- Block Private -->
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -565,7 +646,7 @@
                     app:cardCornerRadius="0dp"
                     app:cardElevation="0dp"
                     app:strokeWidth="1dp"
-                    app:strokeColor="@color/border_light">
+                    app:strokeColor="@color/border">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -583,18 +664,18 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Blokir Nomor Privat / Tersembunyi"
+                                android:text="Block Private / Hidden Numbers"
                                 android:textSize="14sp"
                                 android:textStyle="bold"
-                                android:textColor="?android:attr/textColorPrimary" />
+                                android:textColor="@color/text_primary" />
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="2dp"
-                                android:text="Otomatis tolak panggilan dari Private / Unknown Caller ID."
+                                android:text="Auto-reject calls with no caller ID."
                                 android:textSize="12sp"
-                                android:textColor="?android:attr/textColorSecondary" />
+                                android:textColor="@color/text_secondary" />
                         </LinearLayout>
 
                         <com.google.android.material.switchmaterial.SwitchMaterial
@@ -604,7 +685,7 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Toggle Block All Calls -->
+                <!-- Block All -->
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -612,7 +693,7 @@
                     app:cardCornerRadius="0dp"
                     app:cardElevation="0dp"
                     app:strokeWidth="1dp"
-                    app:strokeColor="@color/border_light">
+                    app:strokeColor="@color/border">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -630,18 +711,18 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Blokir Semua Panggilan Masuk"
+                                android:text="Block All Incoming Calls"
                                 android:textSize="14sp"
                                 android:textStyle="bold"
-                                android:textColor="?android:attr/textColorPrimary" />
+                                android:textColor="@color/text_primary" />
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="2dp"
-                                android:text="Mode darurat / fokus (nomor kontak dan whitelist tetap diizinkan)."
+                                android:text="Focus mode — contacts and whitelist still allowed."
                                 android:textSize="12sp"
-                                android:textColor="?android:attr/textColorSecondary" />
+                                android:textColor="@color/text_secondary" />
                         </LinearLayout>
 
                         <com.google.android.material.switchmaterial.SwitchMaterial
@@ -651,7 +732,7 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Toggle Notification -->
+                <!-- Notifications -->
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -659,7 +740,7 @@
                     app:cardCornerRadius="0dp"
                     app:cardElevation="0dp"
                     app:strokeWidth="1dp"
-                    app:strokeColor="@color/border_light">
+                    app:strokeColor="@color/border">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -677,18 +758,18 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Notifikasi Panggilan Diblokir"
+                                android:text="Blocked Call Notifications"
                                 android:textSize="14sp"
                                 android:textStyle="bold"
-                                android:textColor="?android:attr/textColorPrimary" />
+                                android:textColor="@color/text_primary" />
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="2dp"
-                                android:text="Tampilkan pemberitahuan setelah panggilan spam ditolak."
+                                android:text="Show notification when a spam call is rejected."
                                 android:textSize="12sp"
-                                android:textColor="?android:attr/textColorSecondary" />
+                                android:textColor="@color/text_secondary" />
                         </LinearLayout>
 
                         <com.google.android.material.switchmaterial.SwitchMaterial
@@ -699,7 +780,42 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Permission Contacts Button -->
+                <!-- Stats card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    app:cardCornerRadius="0dp"
+                    app:cardElevation="0dp"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="@color/border">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="12dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Statistics"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/text_primary"
+                            android:layout_marginBottom="8dp" />
+
+                        <TextView
+                            android:id="@+id/tvStatsContent"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Loading…"
+                            android:textSize="13sp"
+                            android:fontFamily="monospace"
+                            android:textColor="@color/text_secondary" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnCheckContactPermission"
                     style="@style/Widget.App.Button.Outlined"
@@ -707,11 +823,10 @@
                     android:layout_height="40dp"
                     android:layout_marginBottom="12dp"
                     android:minHeight="0dp"
-                    android:text="Periksa Izin Buku Kontak"
+                    android:text="Check Contact Permission"
                     android:textSize="13sp"
                     app:cornerRadius="0dp" />
 
-                <!-- Quick Preset Rules Button -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnApplyCommonSpamPresets"
                     style="@style/Widget.App.Button.Outlined"
@@ -719,18 +834,17 @@
                     android:layout_height="40dp"
                     android:layout_marginBottom="16dp"
                     android:minHeight="0dp"
-                    android:text="+ Tambahkan Preset Aturan Spam Umum"
+                    android:text="+ Add Common Spam Presets"
                     android:textSize="13sp"
                     app:cornerRadius="0dp" />
 
-                <!-- App Info Footer -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:text="Spam Call Blocker v1.0.0\nFlat Minimalist Call Screening"
+                    android:text="Spam Call Blocker v2.0.0\nFlat Dark Cybersecurity Design"
                     android:textSize="11sp"
-                    android:textColor="?android:attr/textColorSecondary" />
+                    android:textColor="@color/text_secondary" />
             </LinearLayout>
         </ScrollView>
     </FrameLayout>

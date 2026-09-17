@@ -1,24 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Brand Flat Colors -->
+    <!-- Brand -->
     <color name="primary">#E53935</color>
     <color name="primary_variant">#C62828</color>
-    <color name="secondary">#1E88E5</color>
-    <color name="accent_green">#2E7D32</color>
+    <color name="secondary">#58A6FF</color>
+    <color name="accent_green">#3FB950</color>
 
-    <!-- Background & Surface (Light) -->
-    <color name="bg_light">#F5F5F5</color>
-    <color name="surface_light">#FFFFFF</color>
-    <color name="border_light">#E0E0E0</color>
-    <color name="text_primary_light">#111111</color>
-    <color name="text_secondary_light">#666666</color>
-
-    <!-- Background & Surface (Dark) -->
-    <color name="bg_dark">#121212</color>
-    <color name="surface_dark">#1E1E1E</color>
-    <color name="border_dark">#333333</color>
-    <color name="text_primary_dark">#EEEEEE</color>
-    <color name="text_secondary_dark">#9E9E9E</color>
+    <!-- Light mode surfaces -->
+    <color name="bg">#FFFFFF</color>
+    <color name="surface">#F6F8FA</color>
+    <color name="border">#D0D7DE</color>
+    <color name="text_primary">#1F2328</color>
+    <color name="text_secondary">#656D76</color>
+    <color name="badge_warn_bg">#FFEBEE</color>
+    <color name="badge_info_bg">#E3F2FD</color>
+    <color name="accent_border">#E53935</color>
 
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
